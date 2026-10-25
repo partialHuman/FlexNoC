@@ -1,0 +1,11 @@
+# Hotspot Contention Traffic Workload Configuration
+traffic:
+  pattern: "hotspot"
+  pattern_id: 1
+  hotspot_node: 0
+  hotspot_bias_pct: 30
+  num_packets: 1000
+  injection_rate_pct: 20
+  seed: 42
+  warmup_cycles: 50
+  drain_timeout_cycles: 2000

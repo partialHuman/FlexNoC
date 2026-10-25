@@ -1,0 +1,62 @@
+# FlexNoC - Git Ignore Configuration
+
+# Build artifacts & temporary simulation files
+*.vcd
+*.fst
+*.ghw
+*.wlf
+*.log
+*.jou
+*.pb
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+*.a
+*.lib
+
+# Simulators & Tool directories
+work/
+obj_dir/
+simv/
+simv.daidir/
+csrc/
+.simvision/
+dump.vcd
+*.vcd.hier
+INCA_libs/
+xcelium.d/
+.Xil/
+xsim.dir/
+*.wdb
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.venv/
+env/
+venv/
+
+# FlexNoC Generated files (keep configs & scripts, ignore transient results)
+waveforms/*.vcd
+waveforms/*.fst
+results/raw/
+results/temp/
+
+# IDE & Editor files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*~

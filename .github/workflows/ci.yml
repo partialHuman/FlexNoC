@@ -1,0 +1,41 @@
+name: FlexNoC Continuous Integration
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint-and-test:
+    name: Lint, Simulation Regression & Synthesis Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Open-Source EDA Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog verilator yosys make
+
+      - name: Check Environment
+        run: python scripts/check_environment.py
+
+      - name: Run RTL Lint Checks
+        run: python scripts/run_lint.py
+
+      - name: Run Automated Regression Suite
+        run: python scripts/run_regression.py all
+
+      - name: Run Yosys Synthesis Verification
+        run: python scripts/run_synthesis.py
+
+      - name: Run Performance Benchmark Sweeps
+        run: python scripts/run_experiments.py

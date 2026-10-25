@@ -1,0 +1,9 @@
+read_verilog -sv rtl/fifo/input_fifo.sv
+hierarchy -check -top input_fifo 
+proc
+opt
+fsm
+opt
+memory
+opt
+stat

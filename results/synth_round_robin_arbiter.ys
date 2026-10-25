@@ -1,0 +1,9 @@
+read_verilog -sv rtl/arbitration/round_robin_arbiter.sv
+hierarchy -check -top round_robin_arbiter 
+proc
+opt
+fsm
+opt
+memory
+opt
+stat

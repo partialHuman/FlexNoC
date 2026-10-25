@@ -1,0 +1,9 @@
+# Uniform Random Traffic Workload Configuration
+traffic:
+  pattern: "uniform_random"
+  pattern_id: 0
+  num_packets: 1000
+  injection_rate_pct: 20
+  seed: 42
+  warmup_cycles: 50
+  drain_timeout_cycles: 2000

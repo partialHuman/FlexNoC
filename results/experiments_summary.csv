@@ -1,0 +1,25 @@
+pattern_name,traffic_pattern,offered_rate,injected,delivered,total_cycles,throughput,min_latency,avg_latency,p50_latency,p95_latency,p99_latency,max_latency
+Uniform Random,0,5,350,350,470,0.7447,3,4.81,5,7,8,8
+Uniform Random,0,10,350,350,237,1.4768,3,4.83,5,7,8,8
+Uniform Random,0,15,350,350,155,2.2581,3,4.95,5,7,8,10
+Uniform Random,0,20,350,350,114,3.0702,3,4.91,5,7,9,10
+Uniform Random,0,25,350,350,101,3.4653,3,4.86,5,7,9,9
+Uniform Random,0,30,350,350,76,4.6053,3,5.07,5,8,9,11
+Uniform Random,0,40,350,350,64,5.4688,3,5.55,5,9,13,13
+Uniform Random,0,50,350,350,55,6.3636,3,5.66,5,10,12,14
+Hotspot Contention,1,5,350,350,467,0.7495,2,4.97,5,8,8,10
+Hotspot Contention,1,10,350,350,235,1.4894,2,5.02,5,8,9,10
+Hotspot Contention,1,15,350,350,159,2.2013,2,6.93,5,22,32,34
+Hotspot Contention,1,20,350,350,133,2.6316,2,10.25,6,39,51,58
+Hotspot Contention,1,25,350,350,133,2.6316,2,11.98,6,38,55,58
+Hotspot Contention,1,30,350,350,119,2.9412,2,13.62,6,53,59,60
+Hotspot Contention,1,40,350,350,140,2.5,2,26.75,9,100,110,113
+Hotspot Contention,1,50,350,350,113,3.0973,2,21.55,8,76,89,90
+Neighbor Traffic,2,5,350,350,470,0.7447,3,3.01,3,3,4,4
+Neighbor Traffic,2,10,350,350,234,1.4957,3,3.03,3,3,4,4
+Neighbor Traffic,2,15,350,350,152,2.3026,3,3.07,3,4,5,5
+Neighbor Traffic,2,20,350,350,112,3.125,3,3.09,3,4,4,5
+Neighbor Traffic,2,25,350,350,99,3.5354,3,3.13,3,4,5,6
+Neighbor Traffic,2,30,350,350,73,4.7945,3,3.17,3,4,5,6
+Neighbor Traffic,2,40,350,350,60,5.8333,3,3.25,3,4,6,7
+Neighbor Traffic,2,50,350,350,56,6.25,3,3.6,3,6,9,10

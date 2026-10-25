@@ -1,0 +1,14 @@
+{
+  "traffic_pattern": 2,
+  "offered_rate": 50,
+  "injected": 350,
+  "delivered": 350,
+  "total_cycles": 56,
+  "throughput": 6.2500,
+  "min_latency": 3,
+  "avg_latency": 3.60,
+  "p50_latency": 3,
+  "p95_latency": 6,
+  "p99_latency": 9,
+  "max_latency": 10
+}

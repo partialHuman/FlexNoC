@@ -1,0 +1,37 @@
+[
+  {
+    "name": "input_fifo",
+    "top": "input_fifo",
+    "total_cells": 36,
+    "flip_flops": 13,
+    "muxes": 2
+  },
+  {
+    "name": "round_robin_arbiter",
+    "top": "round_robin_arbiter",
+    "total_cells": 24,
+    "flip_flops": 3,
+    "muxes": 2
+  },
+  {
+    "name": "flexnoc_router",
+    "top": "flexnoc_router",
+    "total_cells": 515,
+    "flip_flops": 81,
+    "muxes": 10
+  },
+  {
+    "name": "mesh_2x2",
+    "top": "mesh_top",
+    "total_cells": 2064,
+    "flip_flops": 276,
+    "muxes": 40
+  },
+  {
+    "name": "mesh_4x4",
+    "top": "mesh_top",
+    "total_cells": 8256,
+    "flip_flops": 1056,
+    "muxes": 160
+  }
+]
