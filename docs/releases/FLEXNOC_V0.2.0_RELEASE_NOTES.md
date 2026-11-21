@@ -1,10 +1,13 @@
-# FlexNoC v0.2.0 Release Notes — Release Candidate 1 (RC1)
+# FlexNoC v0.2.0 Release Notes
 
-- **Release Version**: `v0.2.0` (Release Candidate 1)
+- **Release Version**: `v0.2.0` (Stable Release)
 - **Release Target**: Production Baseline Multi-Core Interconnect IP
 - **Date**: 2026-11-21
 - **Repository**: `partialHuman/FlexNoC`
-- **Base Commit**: `e87277a` (PR #2 Merged into `main`)
+- **Baseline Release**: `v0.1.0` (`8c6493b`)
+- **Release History**:
+  - `v0.2.0-rc1` (2026-11-21): Initial release candidate establishing architecture verification hardening and benchmark audit.
+  - `v0.2.0` (2026-11-21): Stable release incorporating benchmark runner reliability hardening, independent dataset validation, and release evidence reconciliation.
 - **License**: MIT License
 
 ---
@@ -42,6 +45,10 @@ All eight regression test suites pass with 100% success across Verilator lint, I
   3. *Packet Loss / Dropped Flit*: Caught by scoreboard drain timeout.
   4. *Duplicate Packet Delivery*: Caught by retirement bitmap tracker.
 - Automated within regression runner via `scripts/run_regression.py`.
+
+### 2.5 Benchmark Runner Hardening & Unit Testing
+- Hardened `scripts/run_experiments.py` against silent failures: enforces output file pre-removal to eliminate stale data inheritance, checks simulation subprocess exit codes immediately, verifies output freshness, validates JSON schema and type safety, and asserts monotonic latency percentiles.
+- Added 21 automated regression unit tests in `tests/test_run_experiments.py` verifying detection of non-zero simulation exit codes, missing outputs, malformed JSON, stale files, and incomplete sweeps.
 
 ---
 
@@ -170,15 +177,18 @@ All verification and build steps can be reproduced from the project root using s
 # 1. Environment and toolchain verification
 python scripts/check_environment.py
 
-# 2. RTL Lint Checks (Verilator)
+# 2. Benchmark Runner Unit Tests (21 tests)
+python -m unittest discover tests
+
+# 3. RTL Lint Checks (Verilator)
 python scripts/run_lint.py
 
-# 3. Full Automated Regression (8 suites, 3,472 assertions)
+# 4. Full Automated Regression (8 suites, 3,472 assertions)
 python scripts/run_regression.py all
 
-# 4. Yosys Logic Synthesis Verification (5 targets)
+# 5. Yosys Logic Synthesis Verification (5 targets)
 python scripts/run_synthesis.py
 
-# 5. Multi-Workload Performance Benchmark Sweeps (24 points)
+# 6. Multi-Workload Performance Benchmark Sweeps (24 points)
 python scripts/run_experiments.py
 ```

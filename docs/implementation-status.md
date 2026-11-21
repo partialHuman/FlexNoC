@@ -44,10 +44,12 @@
 
 - **v0.1.0 (Initial Release)**: Baseline 5-port router and 2D mesh, dimension-order XY routing, round-robin arbitration, ready/valid flow control, 1,775 checks.
 - **v0.1.1 (CI Hotfix)**: Fixed Icarus Verilog compatibility (`tb_mesh_4x4.sv:158` break statement replacement).
-- **v0.2.0 (Hardening & Audit)**:
+- **v0.2.0 (Stable Release — Hardening & Verification Expansion)**:
   - Proven crossbar mutual-exclusion guarantee.
   - Expanded 4x4 mesh to exhaustive 256 all-pairs and 16-node simultaneous injection.
   - Added router mid-flight reset and randomized backpressure stress tests.
   - Added scoreboard fault-injection validation (payload corruption, wrong destination, missing packet, duplicate delivery).
-  - Regression expanded to 3,472 assertions across 8 test suites (100% passing).
-- **v0.3.0 (Planned)**: Multi-flit packet support with Head/Body/Tail framing, wormhole switching, and packet-level arbiter locking.
+  - Hardened benchmark automation runner with output isolation, exit code validation, schema checks, and unit tests (`tests/test_run_experiments.py`).
+  - Regression expanded to 3,472 assertions across 8 test suites (100% passing) + 21 runner unit tests.
+- **v0.3.0 (Planned Architecture Specification — Not Implemented in v0.2.0 RTL)**:
+  - Multi-flit packet architecture specification with Head/Body/Tail framing, wormhole switching, atomic output reservation locking, and 5-bit counter sizing (documented in `docs/architecture/`).

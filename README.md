@@ -125,7 +125,7 @@ flexnoc/
 │   ├── synthesis-methodology.md    # Gate counts & synthesis methodology
 │   ├── limitations.md              # Technical assumptions & scope bounds
 │   ├── architecture/               # Forward-looking v0.3.0 multi-flit specifications
-│   └── releases/                   # Formal release candidate notes
+│   └── releases/                   # Formal release notes
 ├── rtl/                            # Synthesizable SystemVerilog RTL
 │   ├── common/flexnoc_pkg.sv       # Global parameters, types, helper functions
 │   ├── fifo/input_fifo.sv          # Synchronous FWFT input queue
@@ -145,6 +145,8 @@ flexnoc/
 │   ├── run_regression.py           # Automated regression runner
 │   ├── run_experiments.py          # Multi-workload benchmark sweeps
 │   └── run_synthesis.py            # Yosys synthesis automation
+├── tests/                          # Toolchain and benchmark runner unit tests
+│   └── test_run_experiments.py    # Runner error-handling and schema validation
 └── results/                        # Generated reports, metrics (JSON/CSV)
 ```
 
@@ -179,10 +181,13 @@ make test-mesh
 # 6. Run full automated regression suite
 make test
 
-# 7. Run Yosys synthesis sweeps
+# 7. Run benchmark runner unit tests
+python -m unittest discover tests
+
+# 8. Run Yosys synthesis sweeps
 make synth
 
-# 8. Run performance benchmark sweeps
+# 9. Run performance benchmark sweeps
 make benchmark
 ```
 
