@@ -119,41 +119,39 @@ module tb_scoreboard_fault_injection;
         if (retired_pkt_ids[rx_pkt_id]) begin
             $display("[SCOREBOARD DETECT] Duplicate packet detected! pkt_id=%0d", rx_pkt_id);
             fault4_duplicate_pkt_detected = 1;
-            return;
         end
-
         // Check for wrong destination delivery
-        if ((rx_dy * MESH_WIDTH + rx_dx) != node_id) begin
+        else if ((rx_dy * MESH_WIDTH + rx_dx) != node_id) begin
             $display("[SCOREBOARD DETECT] Packet delivered to wrong node! target=(%0d,%0d) arrived at node %0d",
                      rx_dx, rx_dy, node_id);
             fault2_wrong_dest_detected = 1;
-            return;
         end
-
-        // Search expected queue
-        match_found = 0;
-        match_idx = 0;
-        for (int i = 0; i < expected_queue.size() && !match_found; i = i + 1) begin
-            exp_item = expected_queue[i];
-            exp_dst  = int'(exp_item[47:32]);
-            if (exp_dst == node_id && exp_item[7:0] == rx_pkt_id) begin
-                match_idx = i;
-                match_found = 1;
+        else begin
+            // Search expected queue
+            match_found = 0;
+            match_idx = 0;
+            for (int i = 0; i < expected_queue.size() && !match_found; i = i + 1) begin
+                exp_item = expected_queue[i];
+                exp_dst  = int'(exp_item[47:32]);
+                if (exp_dst == node_id && exp_item[7:0] == rx_pkt_id) begin
+                    match_idx = i;
+                    match_found = 1;
+                end
             end
-        end
 
-        if (match_found) begin
-            exp_item = expected_queue[match_idx];
-            exp_pld  = exp_item[31:16];
-            if (rx_payload !== exp_pld) begin
-                $display("[SCOREBOARD DETECT] Payload mismatch! Expected 0x%h, Got 0x%h", exp_pld, rx_payload);
-                fault1_payload_mismatch_detected = 1;
+            if (match_found) begin
+                exp_item = expected_queue[match_idx];
+                exp_pld  = exp_item[31:16];
+                if (rx_payload !== exp_pld) begin
+                    $display("[SCOREBOARD DETECT] Payload mismatch! Expected 0x%h, Got 0x%h", exp_pld, rx_payload);
+                    fault1_payload_mismatch_detected = 1;
+                end
+                retired_pkt_ids[rx_pkt_id] = 1'b1;
+                expected_queue.delete(match_idx);
+            end else begin
+                $display("[SCOREBOARD DETECT] Unexpected packet received at node %0d! pkt_id=%0d", node_id, rx_pkt_id);
+                fault2_wrong_dest_detected = 1;
             end
-            retired_pkt_ids[rx_pkt_id] = 1'b1;
-            expected_queue.delete(match_idx);
-        end else begin
-            $display("[SCOREBOARD DETECT] Unexpected packet received at node %0d! pkt_id=%0d", node_id, rx_pkt_id);
-            fault2_wrong_dest_detected = 1;
         end
     endtask
 
