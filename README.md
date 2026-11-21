@@ -14,7 +14,7 @@
 
 - **Modular 5-Port Router Microarchitecture**: Decoupled ingress buffers (First-Word Fall-Through), combinational route computation, independent per-output arbiters, and non-blocking $5\times 5$ crossbar switch.
 - **2D Mesh Topology**: Automated grid generator supporting configurable $M \times N$ dimensions with boundary condition handling ($2\times 2$ and $4\times 4$ verified).
-- **Dimension-Order XY Routing**: Provably deadlock-free routing using turn-prohibition rules (strictly prohibits turns from Y dimension into X dimension).
+- **Dimension-Order XY Routing**: Deadlock-free routing under standard endpoint consumption assumptions, enforced by prohibiting turns from Y dimension into X dimension; empirically validated with zero deadlocks observed across all tested scenarios.
 - **Strictly Fair Arbitration**: Round-robin output arbitration updated strictly on confirmed downstream handshakes.
 - **Zero Combinational Ready Loops**: Input FIFO buffering guarantees that ingress `ready` is combinationally decoupled from egress `ready`.
 - **Reproducible Verification & Benchmark Suite**: 100% self-checking regression testbenches, cycle-accurate performance sweeps across multiple workloads, and automated Yosys gate synthesis.
@@ -204,24 +204,43 @@ Full automated regression test evidence:
 | `tb_scoreboard_fault_injection` | Scoreboard Fault-Injection (4 failure modes) | 4 | **PASS** | 0.04s |
 | **Total** | | **3,472** | **100% PASS** | **~1.1s** |
 
+> [!NOTE]
+> Assertion counts reflect dynamically evaluated self-checking assertions and protocol invariant checks within the simulation regression suite. They are distinct from functional/code coverage metrics (such as line, branch, or toggle coverage).
+
 ---
 
-## 7. Performance Benchmark Results (4x4 Mesh)
+## 7. Performance Benchmark Results (4x4 Mesh — All 24 Empirical Points)
 
-Measured across 24 empirical load points using `scripts/run_experiments.py`:
+Measured across all 24 empirical load points using `scripts/run_experiments.py` (16 nodes, 100 MHz, 350 flits injected per point, 2,000-cycle bounded drain):
 
-| Workload | Injection Rate | Throughput (flits/cyc) | Avg Latency (cyc) | p95 Latency | Packet Loss |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Uniform Random** | 10% | 1.4768 | 4.83 | 7 | 0.00% |
-| **Uniform Random** | 20% | 3.0702 | 4.91 | 7 | 0.00% |
-| **Uniform Random** | 30% | 4.6053 | 5.07 | 8 | 0.00% |
-| **Uniform Random** | 50% | 6.3636 | 5.66 | 10 | 0.00% |
-| **Hotspot (30% to N0)** | 10% | 1.4894 | 5.02 | 8 | 0.00% |
-| **Hotspot (30% to N0)** | 20% | 2.6316 | 10.25 | 39 | 0.00% |
-| **Hotspot (30% to N0)** | 40% | 2.5000 | 26.75 | 100 | 0.00% |
-| **Neighbor (1-hop)** | 10% | 1.4957 | 3.03 | 3 | 0.00% |
-| **Neighbor (1-hop)** | 30% | 4.7945 | 3.17 | 4 | 0.00% |
-| **Neighbor (1-hop)** | 50% | 6.2500 | 3.60 | 6 | 0.00% |
+| Workload | Offered Rate (%) | Aggregate Throughput (flits/cyc) | Avg Latency (cyc) | p50 Latency | p95 Latency | p99 Latency | Packet Loss |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Uniform Random** | 5% | 0.7447 | 4.81 | 5 | 7 | 8 | **0.00%** |
+| **Uniform Random** | 10% | 1.4768 | 4.83 | 5 | 7 | 8 | **0.00%** |
+| **Uniform Random** | 15% | 2.2581 | 4.95 | 5 | 7 | 8 | **0.00%** |
+| **Uniform Random** | 20% | 3.0702 | 4.91 | 5 | 7 | 9 | **0.00%** |
+| **Uniform Random** | 25% | 3.4653 | 4.86 | 5 | 7 | 9 | **0.00%** |
+| **Uniform Random** | 30% | 4.6053 | 5.07 | 5 | 8 | 9 | **0.00%** |
+| **Uniform Random** | 40% | 5.4688 | 5.55 | 5 | 9 | 13 | **0.00%** |
+| **Uniform Random** | 50% | 6.3636 | 5.66 | 5 | 10 | 12 | **0.00%** |
+| **Hotspot (30% to N0)** | 5% | 0.7495 | 4.97 | 5 | 8 | 8 | **0.00%** |
+| **Hotspot (30% to N0)** | 10% | 1.4894 | 5.02 | 5 | 8 | 9 | **0.00%** |
+| **Hotspot (30% to N0)** | 15% | 2.2013 | 6.93 | 5 | 22 | 32 | **0.00%** |
+| **Hotspot (30% to N0)** | 20% | 2.6316 | 10.25 | 6 | 39 | 51 | **0.00%** |
+| **Hotspot (30% to N0)** | 25% | 2.6316 | 11.98 | 6 | 38 | 55 | **0.00%** |
+| **Hotspot (30% to N0)** | 30% | 2.9412 | 13.62 | 6 | 53 | 59 | **0.00%** |
+| **Hotspot (30% to N0)** | 40% | 2.5000 | 26.75 | 9 | 100 | 110 | **0.00%** |
+| **Hotspot (30% to N0)** | 50% | 3.0973 | 21.55 | 8 | 76 | 89 | **0.00%** |
+| **Neighbor (1-hop)** | 5% | 0.7447 | 3.01 | 3 | 3 | 4 | **0.00%** |
+| **Neighbor (1-hop)** | 10% | 1.4957 | 3.03 | 3 | 3 | 4 | **0.00%** |
+| **Neighbor (1-hop)** | 15% | 2.3026 | 3.07 | 3 | 4 | 5 | **0.00%** |
+| **Neighbor (1-hop)** | 20% | 3.1250 | 3.09 | 3 | 4 | 4 | **0.00%** |
+| **Neighbor (1-hop)** | 25% | 3.5354 | 3.13 | 3 | 4 | 5 | **0.00%** |
+| **Neighbor (1-hop)** | 30% | 4.7945 | 3.17 | 3 | 4 | 5 | **0.00%** |
+| **Neighbor (1-hop)** | 40% | 5.8333 | 3.25 | 3 | 4 | 6 | **0.00%** |
+| **Neighbor (1-hop)** | 50% | 6.2500 | 3.60 | 3 | 6 | 9 | **0.00%** |
+
+*All 24 empirical sweep points achieved **0.00% packet loss** with zero deadlocks observed under standard endpoint liveness assumptions. For full breakdown, see [docs/performance-methodology.md](docs/performance-methodology.md) and [docs/releases/FLEXNOC_V0.2.0_RELEASE_NOTES.md](docs/releases/FLEXNOC_V0.2.0_RELEASE_NOTES.md).*
 
 ---
 
@@ -236,6 +255,9 @@ Generic logic gate and register counts reported by Yosys (version 0.70+219):
 | `flexnoc_router` (5-port) | 515 | 81 | 185 | 249 |
 | `mesh_top` ($2\times 2$) | 2,064 | 276 | 700 | 1,088 |
 | `mesh_top` ($4\times 4$) | 8,256 | 1,056 | 2,800 | 4,400 |
+
+> [!NOTE]
+> Cell and gate counts are generic unmapped logic primitives produced by Yosys elaboration for structural auditing; they do not represent physical post-layout PPA (power, performance, area) on commercial foundry PDKs or FPGA target families.
 
 ---
 
