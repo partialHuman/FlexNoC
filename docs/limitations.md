@@ -2,13 +2,13 @@
 
 ## 1. Scope & Implementation Boundaries
 
-FlexNoC is currently at **Version 1.0 (Verified Research Baseline)**. To preserve engineering integrity and prevent misrepresentation, all operational limitations and boundary conditions are explicitly documented below.
+FlexNoC is currently at **v0.2.0 (Stable Baseline)**. To preserve engineering integrity and prevent misrepresentation, all operational limitations and boundary conditions are explicitly documented below.
 
 | Feature Area | Current Baseline Implementation | Planned Extension / Deferred |
 | :--- | :--- | :--- |
 | **Topology** | 2D Mesh ($2\times2$ and $4\times4$ verified) | Torus, Ring, Hexagonal Mesh |
 | **Routing Algorithm** | Deterministic Dimension-Order XY | Adaptive routing, West-first, DyXY |
-| **Packet Structure** | Fixed-width single-flit packet (32 bits default) | Multi-flit packets (Head/Body/Tail framing) |
+| **Packet Structure** | Fixed-width single-flit packet (32 bits default) | Multi-flit packets (Head/Body/Tail framing, planned v0.3.0) |
 | **Virtual Channels** | Single physical channel per port (no VCs) | Multi-VC buffering with VC allocators |
 | **Flow Control** | Credit-less Ready/Valid Handshake | Credit-based flow control |
 | **Clocking** | Synchronous single-clock network | Multi-clock asynchronous boundary FIFOs |
