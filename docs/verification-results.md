@@ -70,3 +70,12 @@ This document presents the actual simulation and verification results collected 
   - Single Router: 515 cells, 81 flip-flops, 10 multiplexers.
   - 2x2 Mesh: 2,064 cells, 276 flip-flops, 40 multiplexers.
   - 4x4 Mesh: 8,256 cells, 1,056 flip-flops, 160 multiplexers.
+
+---
+
+## 5. Post-v0.1.0 CI Portability & Compatibility Update
+
+- **Issue Encountered**: During GitHub Actions CI execution on Ubuntu runners, `tb_mesh_4x4` failed compilation under standard Icarus Verilog (`iverilog`) distributions due to `sorry: break statements not supported.` at line 158.
+- **Root Cause**: Production Icarus Verilog releases (v11/v12 on Ubuntu) do not implement procedural `break` statements in loops, whereas modern development snapshots (v14-devel) partially parse them.
+- **Resolution**: Replaced procedural `break;` in `tb/mesh/tb_mesh_4x4.sv` task `verify_packet` with a portable compound loop condition (`&& !found`) and hoisted iteration variables to task scope.
+- **Verification**: Full regression re-run across all 7 suites (1,775 assertions passing, 0 failures), Verilator lint clean, Yosys synthesis clean. See [docs/audit/CI_4X4_COMPATIBILITY_FIX_REPORT.md](audit/CI_4X4_COMPATIBILITY_FIX_REPORT.md) for the complete engineering audit.
