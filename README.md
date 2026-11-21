@@ -1,6 +1,6 @@
 # FlexNoC: Configurable Network-on-Chip IP for Multicore SoCs
 
-[![CI](https://github.com/flexnoc/flexnoc/actions/workflows/ci.yml/badge.svg)](https://github.com/flexnoc/flexnoc/actions)
+[![CI](https://github.com/partialHuman/FlexNoC/actions/workflows/ci.yml/badge.svg)](https://github.com/partialHuman/FlexNoC/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![SystemVerilog](https://img.shields.io/badge/Language-SystemVerilog-purple.svg)](rtl/)
 [![Lint: Verilator Clean](https://img.shields.io/badge/Lint-Verilator%20Clean-brightgreen.svg)](scripts/run_lint.py)
@@ -123,7 +123,9 @@ flexnoc/
 │   ├── verification-results.md     # Empirical regression test evidence
 │   ├── performance-methodology.md  # Latency/throughput measurement methodology
 │   ├── synthesis-methodology.md    # Gate counts & synthesis methodology
-│   └── limitations.md              # Technical assumptions & scope bounds
+│   ├── limitations.md              # Technical assumptions & scope bounds
+│   ├── architecture/               # Forward-looking v0.3.0 multi-flit specifications
+│   └── releases/                   # Formal release candidate notes
 ├── rtl/                            # Synthesizable SystemVerilog RTL
 │   ├── common/flexnoc_pkg.sv       # Global parameters, types, helper functions
 │   ├── fifo/input_fifo.sv          # Synchronous FWFT input queue
@@ -196,10 +198,11 @@ Full automated regression test evidence:
 | `tb_route_compute` | XY Routing (256 coordinate pairs) | 770 | **PASS** | 0.03s |
 | `tb_round_robin_arbiter` | Starvation-free priority arbiter | 116 | **PASS** | 0.03s |
 | `tb_crossbar_switch` | 5x5 Crossbar switch | 35 | **PASS** | 0.03s |
-| `tb_flexnoc_router` | 5-Port Router Core | 36 | **PASS** | 0.04s |
+| `tb_flexnoc_router` | 5-Port Router Core (Protocol & Reset stress) | 97 | **PASS** | 0.04s |
 | `tb_mesh_2x2` | 2x2 Network (12 directed flows) | 125 | **PASS** | 0.07s |
-| `tb_mesh_4x4` | 4x4 Network (16 nodes, 6-hop corners) | 665 | **PASS** | 0.31s |
-| **Total** | | **1,775** | **100% PASS** | **0.51s** |
+| `tb_mesh_4x4` | 4x4 Network (256 all-pairs, 16 concurrent injections) | 2,297 | **PASS** | 0.85s |
+| `tb_scoreboard_fault_injection` | Scoreboard Fault-Injection (4 failure modes) | 4 | **PASS** | 0.04s |
+| **Total** | | **3,472** | **100% PASS** | **~1.1s** |
 
 ---
 
