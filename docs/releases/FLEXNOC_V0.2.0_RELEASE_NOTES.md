@@ -94,7 +94,7 @@ Benchmark sweeps were conducted across all 24 empirical load points using `scrip
 
 - **Traffic Patterns**:
   1. *Uniform Random*: Destination chosen uniformly at random across all network nodes ($dst \ne src$).
-  2. *Hotspot Contention*: 30% of traffic directed to Node 0 $(0, 0)$; remaining 70% uniformly distributed ($dst \ne src$).
+  2. *Hotspot Contention*: Destination-selection rule selects Node 0 $(0, 0)$ with 30% probability per generation trial; remaining 70% uniformly distributed excluding the source ($dst \ne src$). When Node 0 is the generating source, the 30% selection permits local loopback ($dst = src = 0$). The 30% figure describes the destination-selection rule rather than the measured proportion of remote-only hotspot traffic.
   3. *Neighbor Traffic*: All nodes send to one of their adjacent Cartesian mesh neighbors $(|x_{dst} - x_{src}| + |y_{dst} - y_{src}| == 1)$.
 - **Offered Rates**: Swept at 5%, 10%, 15%, 20%, 25%, 30%, 40%, 50% Bernoulli trial injection probability per node per cycle, evaluated on cycles where `in_local_ready == 1`.
 - **Target Injected Flits**: Exactly 350 flits injected per sweep point ($350 \times 24 = 8,400$ total flits across the benchmark suite).

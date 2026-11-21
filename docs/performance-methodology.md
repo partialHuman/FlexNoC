@@ -27,7 +27,7 @@ All performance measurements in FlexNoC are gathered on a cycle-accurate, per-fl
 | Pattern | Description | Motivation |
 | :--- | :--- | :--- |
 | **Uniform Random** | Destination is uniformly chosen at random from all nodes $D \ne S$. | Standard baseline evaluating general network capacity under balanced load. |
-| **Hotspot Contention** | 30% of all generated traffic is targeted at Node 0 $(0, 0)$; remaining 70% is uniformly distributed. | Stresses arbitration, buffer congestion, and backpressure trees around a centralized resource (e.g., memory controller). |
+| **Hotspot Contention** | Destination-selection rule selects Node 0 $(0, 0)$ with 30% probability per trial; remaining 70% is uniformly distributed excluding the source ($dst \ne src$). When the source is Node 0, the 30% selection permits local loopback ($dst = src = 0$). | Stresses arbitration, buffer congestion, and backpressure trees around a centralized resource (e.g., memory controller). |
 | **Neighbor Traffic** | Destinations are strictly restricted to adjacent Cartesian neighbors $(\Delta X + \Delta Y == 1)$. | Measures minimum single-hop network latency and high localized throughput. |
 
 ---
@@ -85,7 +85,7 @@ Data gathered from automated benchmark sweeps (`scripts/run_experiments.py`, fix
 2. **Throughput Scaling**:
    - Under uniform random traffic, aggregate throughput scales linearly from **0.74 flits/cycle** at 5% load to **6.36 flits/cycle** at 50% load without network saturation.
 3. **Hotspot Bottleneck Identification**:
-   - Under hotspot traffic with 30% concentration on Node 0, ejection throughput bottlenecks at **~2.6 - 3.0 flits/cycle** due to the single local ejection port limit.
+   - Under hotspot traffic where generation trials select Node 0 with 30% probability, ejection throughput bottlenecks at **~2.6 - 3.0 flits/cycle** due to the single local ejection port limit. Local loopback transfers from Node 0 account for the observed 2-cycle minimum latency.
    - As backpressure propagates through upstream buffers, p95 latency rises from 8 cycles up to 100 cycles, reflecting realistic queue accumulation and tree saturation.
 4. **Zero Packet Loss**:
    - Across all 24 experimental load points and thousands of simulated flits, the packet loss rate remained strictly **0.00%**.
