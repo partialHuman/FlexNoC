@@ -51,6 +51,13 @@ waveforms/*.vcd
 waveforms/*.fst
 results/raw/
 results/temp/
+*.vvp
+results/*.vvp
+results/*.ys
+
+# Office documents (ignore unversioned Office files, keep tracked project docx)
+*.docx
+!FlexNoC_Development_Document.docx
 
 # IDE & Editor files
 .vscode/*
