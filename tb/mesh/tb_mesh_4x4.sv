@@ -100,6 +100,15 @@ module tb_mesh_4x4;
         return id / MESH_WIDTH;
     endfunction
 
+    function automatic int compute_manhattan_hops(int src, int dst);
+        int sx, sy, dx, dy;
+        sx = get_node_x(src);
+        sy = get_node_y(src);
+        dx = get_node_x(dst);
+        dy = get_node_y(dst);
+        return ((dx >= sx) ? (dx - sx) : (sx - dx)) + ((dy >= sy) ? (dy - sy) : (sy - dy));
+    endfunction
+
     // Inject packet into source node
     task inject_packet(
         input int src_node,
@@ -234,7 +243,73 @@ module tb_mesh_4x4;
         end
 
         // ----------------------------------------------------------------------
-        // Test 4: Randomized Traffic (100 packets across all 16 nodes)
+        // Test 4: Exhaustive All-Pairs Verification (16x16 = 256 Directed Pairs)
+        // ----------------------------------------------------------------------
+        $display("--- Testing Exhaustive 256 All-Pairs Routes (16x16 Mesh Nodes) ---");
+        begin
+            int all_src;
+            int all_dst;
+            int pid_cnt;
+            logic [7:0] pid;
+            logic [15:0] pld;
+            int hops;
+
+            pid_cnt = 0;
+            for (all_src = 0; all_src < 16; all_src = all_src + 1) begin
+                for (all_dst = 0; all_dst < 16; all_dst = all_dst + 1) begin
+                    pid = 8'(pid_cnt & 8'hFF);
+                    pld = 16'((all_src << 8) | all_dst);
+                    hops = compute_manhattan_hops(all_src, all_dst);
+
+                    inject_packet(all_src, all_dst, pid, pld);
+                    verify_packet(all_dst, all_src, pid, pld,
+                                  $sformatf("Pair N%0d->N%0d (hops=%0d)", all_src, all_dst, hops));
+                    pid_cnt = pid_cnt + 1;
+                end
+            end
+        end
+
+        // ----------------------------------------------------------------------
+        // Test 5: Concurrent 16-Node Simultaneous Injection
+        // All 16 nodes inject concurrently in the same clock cycle
+        // ----------------------------------------------------------------------
+        $display("--- Testing Concurrent 16-Node Simultaneous Injection ---");
+        begin
+            int target_nodes [16];
+            logic [DATA_WIDTH-1:0] conc_flit;
+            int conc_src, conc_dst;
+            int conc_sx, conc_sy, conc_dx, conc_dy;
+
+            for (conc_src = 0; conc_src < 16; conc_src = conc_src + 1) begin
+                conc_dst = (conc_src + 5) % 16;
+                target_nodes[conc_src] = conc_dst;
+                conc_sx = get_node_x(conc_src);
+                conc_sy = get_node_y(conc_src);
+                conc_dx = get_node_x(conc_dst);
+                conc_dy = get_node_y(conc_dst);
+
+                conc_flit = create_flit(X_WIDTH'(conc_dx), Y_WIDTH'(conc_dy),
+                                        X_WIDTH'(conc_sx), Y_WIDTH'(conc_sy),
+                                        8'h80 + 8'(conc_src), 16'hA500 + 16'(conc_src));
+                in_local_data[(conc_src*DATA_WIDTH) +: DATA_WIDTH] = conc_flit;
+                in_local_valid[conc_src] = 1'b1;
+                packets_injected++;
+            end
+
+            @(posedge clk);
+            @(negedge clk);
+            in_local_valid = '0;
+
+            // Verify receipt of all 16 concurrent packets
+            for (conc_src = 0; conc_src < 16; conc_src = conc_src + 1) begin
+                conc_dst = target_nodes[conc_src];
+                verify_packet(conc_dst, conc_src, 8'h80 + 8'(conc_src), 16'hA500 + 16'(conc_src),
+                              $sformatf("Concurrent N%0d->N%0d", conc_src, conc_dst));
+            end
+        end
+
+        // ----------------------------------------------------------------------
+        // Test 6: Randomized Traffic (100 packets across all 16 nodes)
         // ----------------------------------------------------------------------
         $display("--- Running 100 Randomized Multi-Hop Packets ---");
         begin
