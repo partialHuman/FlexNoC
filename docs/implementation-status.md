@@ -50,6 +50,6 @@
   - Added router mid-flight reset and randomized backpressure stress tests.
   - Added scoreboard fault-injection validation (payload corruption, wrong destination, missing packet, duplicate delivery).
   - Hardened benchmark automation runner with output isolation, exit code validation, schema checks, and unit tests (`tests/test_run_experiments.py`).
-  - Regression expanded to 3,472 assertions across 8 test suites (100% passing) + 21 runner unit tests.
+  - Regression expanded to 3,472 assertions across 8 test suites (100% passing) + 34 runner unit tests.
 - **v0.3.0 (Planned Architecture Specification — Not Implemented in v0.2.0 RTL)**:
   - Multi-flit packet architecture specification with Head/Body/Tail framing, wormhole switching, atomic output reservation locking, and 5-bit counter sizing (documented in `docs/architecture/`).

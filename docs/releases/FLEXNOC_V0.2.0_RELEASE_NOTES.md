@@ -47,8 +47,8 @@ All eight regression test suites pass with 100% success across Verilator lint, I
 - Automated within regression runner via `scripts/run_regression.py`.
 
 ### 2.5 Benchmark Runner Hardening & Unit Testing
-- Hardened `scripts/run_experiments.py` against silent failures: enforces output file pre-removal to eliminate stale data inheritance, checks simulation subprocess exit codes immediately, verifies output freshness, validates JSON schema and type safety, and asserts monotonic latency percentiles.
-- Added 21 automated regression unit tests in `tests/test_run_experiments.py` verifying detection of non-zero simulation exit codes, missing outputs, malformed JSON, stale files, and incomplete sweeps.
+- Hardened `scripts/run_experiments.py` against silent failures: enforces output file pre-removal to eliminate stale data inheritance, checks simulation subprocess exit codes immediately, verifies output freshness, validates JSON schema and type safety, rejects non-finite values and integer overflows, and asserts monotonic latency percentiles.
+- Added 34 automated regression unit tests in `tests/test_run_experiments.py` verifying detection of non-zero simulation exit codes, missing outputs, malformed JSON, non-finite values, integer overflow, stale files, and incomplete sweeps.
 
 ---
 
@@ -177,7 +177,7 @@ All verification and build steps can be reproduced from the project root using s
 # 1. Environment and toolchain verification
 python scripts/check_environment.py
 
-# 2. Benchmark Runner Unit Tests (21 tests)
+# 2. Benchmark Runner Unit Tests (34 tests)
 python -m unittest discover tests
 
 # 3. RTL Lint Checks (Verilator)

@@ -34,9 +34,9 @@ This document presents the actual simulation and verification results collected 
 > The 3,472 checks report dynamically executed self-checking assertions, invariant monitors, and scoreboard checks. Code coverage (line, branch, toggle, expression) and functional covergroups were not collected using coverage instrumentation tools.
 
 ### Benchmark Runner Reliability Testing
-- **Suite**: `tests/test_run_experiments.py` (21 unit tests, Python `unittest`).
-- **Scope**: Subprocess non-zero exit code detection, output file pre-removal and isolation, freshness verification, JSON schema validation, metric constraint checking, and sweep failure abort handling.
-- **Result**: **21/21 PASSED** (0.05s).
+- **Suite**: `tests/test_run_experiments.py` (34 unit tests, Python `unittest`).
+- **Scope**: Subprocess non-zero exit code detection, output file pre-removal and isolation, freshness verification, JSON schema validation, non-finite metric and integer overflow rejection, metric constraint checking, and sweep failure abort handling.
+- **Result**: **34/34 PASSED** (0.05s).
 
 ---
 

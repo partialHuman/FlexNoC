@@ -183,6 +183,44 @@ class TestValidateBenchmarkData(unittest.TestCase):
             with self.assertRaises(BenchmarkValidationError, msg=f"Should reject avg_latency={val}"):
                 validate_benchmark_data(data, traffic=0, rate=10, packets=350)
 
+    def test_extremely_large_positive_throughput_rejected(self):
+        data = copy.deepcopy(VALID_SAMPLE_DATA)
+        data["throughput"] = 10**1000
+        with self.assertRaises(BenchmarkValidationError, msg="Extremely large positive integer throughput must raise BenchmarkValidationError"):
+            validate_benchmark_data(data, traffic=0, rate=10, packets=350)
+
+    def test_extremely_large_negative_throughput_rejected(self):
+        data = copy.deepcopy(VALID_SAMPLE_DATA)
+        data["throughput"] = -(10**1000)
+        with self.assertRaises(BenchmarkValidationError, msg="Extremely large negative integer throughput must raise BenchmarkValidationError"):
+            validate_benchmark_data(data, traffic=0, rate=10, packets=350)
+
+    def test_extremely_large_positive_avg_latency_rejected(self):
+        data = copy.deepcopy(VALID_SAMPLE_DATA)
+        data["avg_latency"] = 10**1000
+        with self.assertRaises(BenchmarkValidationError, msg="Extremely large positive integer avg_latency must raise BenchmarkValidationError"):
+            validate_benchmark_data(data, traffic=0, rate=10, packets=350)
+
+    def test_extremely_large_negative_avg_latency_rejected(self):
+        data = copy.deepcopy(VALID_SAMPLE_DATA)
+        data["avg_latency"] = -(10**1000)
+        with self.assertRaises(BenchmarkValidationError, msg="Extremely large negative integer avg_latency must raise BenchmarkValidationError"):
+            validate_benchmark_data(data, traffic=0, rate=10, packets=350)
+
+    def test_large_integer_overflow_does_not_escape(self):
+        # Verify that OverflowError is explicitly converted to BenchmarkValidationError and never escapes
+        for field in ["throughput", "avg_latency"]:
+            for large_int in [10**1000, -(10**1000)]:
+                data = copy.deepcopy(VALID_SAMPLE_DATA)
+                data[field] = large_int
+                try:
+                    validate_benchmark_data(data, traffic=0, rate=10, packets=350)
+                    self.fail(f"Expected BenchmarkValidationError for {field}={large_int}")
+                except OverflowError:
+                    self.fail(f"OverflowError escaped validation for {field}={large_int}")
+                except BenchmarkValidationError:
+                    pass
+
 
 class TestRunPoint(unittest.TestCase):
     """Test run_point subprocess isolation, error detection, and freshness."""

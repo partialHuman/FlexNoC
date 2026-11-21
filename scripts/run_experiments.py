@@ -97,9 +97,14 @@ def validate_benchmark_data(data, traffic=None, rate=None, packets=None):
             raise BenchmarkValidationError(
                 f"Field '{field}' must be numeric (got {type(val).__name__}: {val})"
             )
-        if not math.isfinite(val):
+        try:
+            if not math.isfinite(val):
+                raise BenchmarkValidationError(
+                    f"Field '{field}' must be a finite real number (got {val})"
+                )
+        except OverflowError:
             raise BenchmarkValidationError(
-                f"Field '{field}' must be a finite real number (got {val})"
+                f"Field '{field}' exceeds finite numeric representation limit (got {val})"
             )
 
     # Contextual matches
