@@ -143,19 +143,19 @@ module tb_mesh_4x4;
         int timeout;
         logic [DATA_WIDTH-1:0] flit;
         bit found;
+        int i;
+        logic [47:0] item;
 
         timeout = 100;
         found = 0;
 
         while (timeout > 0 && !found) begin
-            for (int i = 0; i < global_rx_queue.size(); i++) begin
-                logic [47:0] item;
+            for (i = 0; i < global_rx_queue.size() && !found; i = i + 1) begin
                 item = global_rx_queue[i];
                 if (item[47:32] == 16'(dest_node)) begin
                     flit = item[31:0];
                     global_rx_queue.delete(i);
                     found = 1;
-                    break;
                 end
             end
             if (!found) begin
