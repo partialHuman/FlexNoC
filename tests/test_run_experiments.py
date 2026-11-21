@@ -26,6 +26,7 @@ from scripts.run_experiments import (
     BenchmarkOutputError,
     BenchmarkValidationError,
     validate_benchmark_data,
+    compile_benchmark,
     run_point,
     run_all_experiments,
     main,
@@ -166,6 +167,21 @@ class TestValidateBenchmarkData(unittest.TestCase):
         d4["max_latency"] = 18
         with self.assertRaises(BenchmarkValidationError):
             validate_benchmark_data(d4)
+
+    def test_non_finite_numeric_metrics_rejected(self):
+        # Throughput non-finite values (NaN, +Inf, -Inf)
+        for val in [float("nan"), float("inf"), float("-inf")]:
+            data = copy.deepcopy(VALID_SAMPLE_DATA)
+            data["throughput"] = val
+            with self.assertRaises(BenchmarkValidationError, msg=f"Should reject throughput={val}"):
+                validate_benchmark_data(data, traffic=0, rate=10, packets=350)
+
+        # Average latency non-finite values (NaN, +Inf, -Inf)
+        for val in [float("nan"), float("inf"), float("-inf")]:
+            data = copy.deepcopy(VALID_SAMPLE_DATA)
+            data["avg_latency"] = val
+            with self.assertRaises(BenchmarkValidationError, msg=f"Should reject avg_latency={val}"):
+                validate_benchmark_data(data, traffic=0, rate=10, packets=350)
 
 
 class TestRunPoint(unittest.TestCase):
@@ -359,6 +375,69 @@ class TestRunAllExperiments(unittest.TestCase):
         mock_compile.return_value = "sim.vvp"
         mock_run_all.side_effect = BenchmarkExecutionError("Sim execution failed")
 
+        ret = main()
+        self.assertEqual(ret, 1)
+
+
+class TestProcessLaunchFailures(unittest.TestCase):
+    """Test handling of missing executables and OS launch failures."""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.json_path = os.path.join(self.temp_dir, "benchmark_summary.json")
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    @patch("subprocess.run")
+    def test_missing_iverilog_raises_execution_error(self, mock_subproc):
+        mock_subproc.side_effect = FileNotFoundError(2, "No such file or directory: 'iverilog'")
+        with self.assertRaises(BenchmarkExecutionError) as ctx:
+            compile_benchmark(vvp_file=os.path.join(self.temp_dir, "test.vvp"))
+        self.assertIn("iverilog", str(ctx.exception))
+        self.assertIn("not found", str(ctx.exception))
+
+    @patch("subprocess.run")
+    def test_missing_vvp_raises_execution_error(self, mock_subproc):
+        mock_subproc.side_effect = FileNotFoundError(2, "No such file or directory: 'vvp'")
+        with self.assertRaises(BenchmarkExecutionError) as ctx:
+            run_point("sim.vvp", traffic=0, rate=10, packets=350, json_path=self.json_path)
+        self.assertIn("vvp", str(ctx.exception))
+        self.assertIn("not found", str(ctx.exception))
+
+    @patch("subprocess.run")
+    def test_generic_oserror_in_compile_raises_execution_error(self, mock_subproc):
+        mock_subproc.side_effect = OSError(13, "Permission denied")
+        with self.assertRaises(BenchmarkExecutionError) as ctx:
+            compile_benchmark(vvp_file=os.path.join(self.temp_dir, "test.vvp"))
+        self.assertIn("iverilog", str(ctx.exception))
+        self.assertIn("Permission denied", str(ctx.exception))
+
+    @patch("subprocess.run")
+    def test_generic_oserror_in_run_point_raises_execution_error(self, mock_subproc):
+        mock_subproc.side_effect = OSError(13, "Permission denied")
+        with self.assertRaises(BenchmarkExecutionError) as ctx:
+            run_point("sim.vvp", traffic=0, rate=10, packets=350, json_path=self.json_path)
+        self.assertIn("vvp", str(ctx.exception))
+        self.assertIn("Permission denied", str(ctx.exception))
+
+    @patch("scripts.run_experiments.compile_benchmark")
+    def test_main_returns_1_on_missing_iverilog(self, mock_compile):
+        mock_compile.side_effect = BenchmarkExecutionError("Compiler executable 'iverilog' not found: [Errno 2]")
+        ret = main()
+        self.assertEqual(ret, 1)
+
+    @patch("scripts.run_experiments.compile_benchmark")
+    @patch("scripts.run_experiments.run_all_experiments")
+    def test_main_returns_1_on_missing_vvp(self, mock_run_all, mock_compile):
+        mock_compile.return_value = "sim.vvp"
+        mock_run_all.side_effect = BenchmarkExecutionError("Simulator executable 'vvp' not found: [Errno 2]")
+        ret = main()
+        self.assertEqual(ret, 1)
+
+    @patch("scripts.run_experiments.compile_benchmark")
+    def test_main_returns_1_on_generic_oserror(self, mock_compile):
+        mock_compile.side_effect = BenchmarkExecutionError("Failed to execute compiler command 'iverilog': Permission denied")
         ret = main()
         self.assertEqual(ret, 1)
 

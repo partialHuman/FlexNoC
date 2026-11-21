@@ -8,6 +8,7 @@ Exports results to CSV and JSON formats.
 
 import csv
 import json
+import math
 import os
 import subprocess
 import sys
@@ -50,7 +51,13 @@ def compile_benchmark(vvp_file="results/sim_perf.vvp"):
     ]
     cmd = ["iverilog", "-g2012", "-Irtl/common", "-o", vvp_file] + sources
     print(f"Compiling performance testbench to {vvp_file}...")
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError as e:
+        raise BenchmarkExecutionError(f"Compiler executable '{cmd[0]}' not found: {e}")
+    except OSError as e:
+        raise BenchmarkExecutionError(f"Failed to execute compiler command '{cmd[0]}': {e}")
+
     if res.returncode != 0:
         err_msg = res.stderr.strip() if res.stderr else res.stdout.strip()
         print(f"[ERROR] Compilation failed (exit code {res.returncode}):")
@@ -89,6 +96,10 @@ def validate_benchmark_data(data, traffic=None, rate=None, packets=None):
         if not isinstance(val, (int, float)) or isinstance(val, bool):
             raise BenchmarkValidationError(
                 f"Field '{field}' must be numeric (got {type(val).__name__}: {val})"
+            )
+        if not math.isfinite(val):
+            raise BenchmarkValidationError(
+                f"Field '{field}' must be a finite real number (got {val})"
             )
 
     # Contextual matches
@@ -160,7 +171,12 @@ def run_point(vvp_file, traffic, rate, packets=350, seed=100, json_path="results
         cmd = runner_cmd
 
     # 2. Execute simulation subprocess
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError as e:
+        raise BenchmarkExecutionError(f"Simulator executable '{cmd[0]}' not found: {e}")
+    except OSError as e:
+        raise BenchmarkExecutionError(f"Failed to execute simulation command '{cmd[0]}': {e}")
 
     # 3. Check simulation return code and fail immediately on non-zero
     if res.returncode != 0:
