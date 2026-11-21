@@ -29,6 +29,10 @@ This document presents the actual simulation and verification results collected 
 | `tb_scoreboard_fault_injection` | Unit | 4 | 4 | 0 | 0.06s | **PASSED** |
 | **Total** | | **3,472** | **3,472** | **0** | **~1.2s** | **ALL PASSED** |
 
+> [!NOTE]
+> **Assertion Count vs. Functional Coverage**:
+> The 3,472 checks report dynamically executed self-checking assertions, invariant monitors, and scoreboard checks. Code coverage (line, branch, toggle, expression) and functional covergroups were not collected using coverage instrumentation tools.
+
 ---
 
 ## 3. Key Verification Milestones Validated
@@ -64,7 +68,7 @@ This document presents the actual simulation and verification results collected 
   - 19 of 19 injected packets verified delivered (0% loss).
 - **4x4 Mesh (16 Nodes)**:
   - **Exhaustive 256 All-Pairs Sweep**: All $16 \times 16$ ordered source-destination pairs verified against independent Manhattan hop distance oracle.
-  - **Concurrent 16-Node Simultaneous Injection**: All 16 nodes injected flits in the same cycle; all 16 delivered with 100% integrity.
+  - **Concurrent 16-Node Simultaneous Injection**: All 16 nodes injected flits in the same cycle; all 16 delivered with 100% integrity and zero deadlocks observed under standard endpoint consumption.
   - Corner-to-corner 6-hop routing verified (Node 0 $\leftrightarrow$ Node 15, Node 3 $\leftrightarrow$ Node 12).
   - Row and column sweeps across boundary routers verified.
   - 100 randomized multi-hop packets injected across all 16 nodes; 382 total packets delivered with 100% scoreboarding match.
@@ -80,10 +84,11 @@ This document presents the actual simulation and verification results collected 
 ## 4. Lint & Synthesis Status
 
 - **Verilator Lint**: `verilator_bin --lint-only -Wall -Wno-DECLFILENAME` passed with zero errors and zero warnings across all 7 RTL files.
-- **Yosys Synthesis**: Complete RTL hierarchy successfully elaborated and mapped:
+- **Yosys Synthesis**: Complete RTL hierarchy successfully elaborated and mapped to generic logic primitives:
   - Single Router: 515 cells, 81 flip-flops, 10 multiplexers.
   - 2x2 Mesh: 2,064 cells, 276 flip-flops, 40 multiplexers.
   - 4x4 Mesh: 8,256 cells, 1,056 flip-flops, 160 multiplexers.
+  *(Note: Cell counts reflect generic unmapped logic gate elaboration, not physical ASIC standard cell area or FPGA LUT utilization).*
 
 ---
 
