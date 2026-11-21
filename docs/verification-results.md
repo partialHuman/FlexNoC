@@ -68,7 +68,7 @@ This document presents the actual simulation and verification results collected 
   - 19 of 19 injected packets verified delivered (0% loss).
 - **4x4 Mesh (16 Nodes)**:
   - **Exhaustive 256 All-Pairs Sweep**: All $16 \times 16$ ordered source-destination pairs verified against independent Manhattan hop distance oracle.
-  - **Concurrent 16-Node Simultaneous Injection**: All 16 nodes injected flits in the same cycle; all 16 delivered with 100% integrity and zero deadlocks observed under standard endpoint consumption.
+  - **Concurrent 16-Node Simultaneous Injection**: All 16 nodes injected flits in the same cycle; all 16 delivered with 100% integrity and zero deadlocks observed under standard endpoint consumption assumptions.
   - Corner-to-corner 6-hop routing verified (Node 0 $\leftrightarrow$ Node 15, Node 3 $\leftrightarrow$ Node 12).
   - Row and column sweeps across boundary routers verified.
   - 100 randomized multi-hop packets injected across all 16 nodes; 382 total packets delivered with 100% scoreboarding match.

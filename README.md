@@ -240,7 +240,7 @@ Measured across all 24 empirical load points using `scripts/run_experiments.py` 
 | **Neighbor (1-hop)** | 40% | 5.8333 | 3.25 | 3 | 4 | 6 | **0.00%** |
 | **Neighbor (1-hop)** | 50% | 6.2500 | 3.60 | 3 | 6 | 9 | **0.00%** |
 
-*All 24 empirical sweep points achieved **0.00% packet loss** with zero deadlocks observed under standard endpoint liveness assumptions. For full breakdown, see [docs/performance-methodology.md](docs/performance-methodology.md) and [docs/releases/FLEXNOC_V0.2.0_RELEASE_NOTES.md](docs/releases/FLEXNOC_V0.2.0_RELEASE_NOTES.md).*
+*All 24 empirical sweep points achieved **0.00% packet loss** with zero deadlocks observed under standard endpoint liveness assumptions. In the Hotspot Contention workload, the destination-selection rule assigns Node 0 with 30% probability per generation trial (permitting local loopback when the source is Node 0), while the remaining 70% branch strictly excludes the source node ($dst \ne src$). For full breakdown, see [docs/performance-methodology.md](docs/performance-methodology.md) and [docs/releases/FLEXNOC_V0.2.0_RELEASE_NOTES.md](docs/releases/FLEXNOC_V0.2.0_RELEASE_NOTES.md).*
 
 ---
 

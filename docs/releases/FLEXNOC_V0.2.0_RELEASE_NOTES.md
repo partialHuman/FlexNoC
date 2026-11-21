@@ -1,10 +1,10 @@
 # FlexNoC v0.2.0 Release Notes — Release Candidate 1 (RC1)
 
-- **Release Version**: `v0.2.0-rc1`
+- **Release Version**: `v0.2.0` (Release Candidate 1)
 - **Release Target**: Production Baseline Multi-Core Interconnect IP
 - **Date**: 2026-11-21
 - **Repository**: `partialHuman/FlexNoC`
-- **Base Commit**: `c7edd55` (PR #1 Merged into `main`)
+- **Base Commit**: `e87277a` (PR #2 Merged into `main`)
 - **License**: MIT License
 
 ---
@@ -25,7 +25,7 @@ All eight regression test suites pass with 100% success across Verilator lint, I
 
 ### 2.2 Exhaustive 2D Mesh All-Pairs & Concurrency Expansion
 - Expanded `tb/mesh/tb_mesh_4x4.sv` to execute an exhaustive sweep of all $16 \times 16 = 256$ ordered source-to-destination pairs.
-- Added 16-node concurrent injection: all 16 mesh nodes simultaneously inject traffic into the network on the exact same clock cycle. Verified that all 16 packets route to their destinations with zero packet loss, zero deadlocks observed under the evaluated scenarios, and verified latency bounds.
+- Added 16-node concurrent injection: all 16 mesh nodes simultaneously inject traffic into the network on the exact same clock cycle. Verified that all 16 packets route to their destinations with zero packet loss, zero deadlocks observed under evaluated scenarios, and verified latency bounds.
 - Expanded 4x4 mesh verification checks from 665 to **2,297 self-checking assertions**.
 
 ### 2.3 Router Protocol, Reset & Backpressure Stress Testing
@@ -59,11 +59,11 @@ All eight regression test suites pass with 100% success across Verilator lint, I
 | 6 | `tb_mesh_2x2` | Integration | 4-node grid, 12 directed flows, backpressure | 125 | **PASSED** | 0.16s |
 | 7 | `tb_mesh_4x4` | Integration | 16-node grid, 256 all-pairs, 16 concurrent injections | 2,297 | **PASSED** | 0.96s |
 | 8 | `tb_scoreboard_fault_injection` | Unit | Scoreboard error trapping under fault injection | 4 | **PASSED** | 0.08s |
-| **Total** | **Regression Suite** | | **Full Regression Scope (8/8 Suites)** | **3,472** | **100% PASS** | **~1.5s** |
+| **Total** | **Regression Suite** | | **Regression Test Suite Scope (8/8 Suites)** | **3,472** | **100% PASS** | **~1.5s** |
 
 > [!NOTE]
 > **Verification Scope & Assertion Distinction**:
-> The 3,472 reported self-checking assertions validate protocol contracts, invariant assertions, routing correctness, buffer state transitions, crossbar mutual exclusion, and scoreboard retirement matching. They represent structural assertions evaluated dynamically across simulation cycles rather than line/branch/toggle/FSM code coverage gathered by a coverage tool.
+> The 3,472 reported self-checking assertions validate protocol contracts, invariant assertions, routing correctness, buffer state transitions, crossbar mutual exclusion, and scoreboard retirement matching. They represent structural assertions evaluated dynamically across simulation cycles rather than line, branch, toggle, or expression coverage gathered by a coverage tool.
 
 ### 3.2 RTL Lint Status (Verilator)
 - Tool: Verilator 5.053 devel (`verilator_bin --lint-only -Wall -Wno-DECLFILENAME`)
@@ -94,13 +94,13 @@ Benchmark sweeps were conducted across all 24 empirical load points using `scrip
 
 - **Traffic Patterns**:
   1. *Uniform Random*: Destination chosen uniformly at random across all network nodes ($dst \ne src$).
-  2. *Hotspot Contention*: 30% of traffic directed to Node 0 $(0, 0)$; remaining 70% uniformly distributed ($dst \ne src$).
-  3. *Neighbor Traffic*: All nodes send to one of their adjacent mesh neighbors $(|x_{dst} - x_{src}| + |y_{dst} - y_{src}| == 1)$.
+  2. *Hotspot Contention*: Destination-selection rule selects Node 0 $(0, 0)$ with 30% probability per generation trial; remaining 70% uniformly distributed excluding the source ($dst \ne src$). When Node 0 is the generating source, the 30% selection permits local loopback ($dst = src = 0$). The 30% figure describes the destination-selection rule rather than the measured proportion of remote-only hotspot traffic.
+  3. *Neighbor Traffic*: All nodes send to one of their adjacent Cartesian mesh neighbors $(|x_{dst} - x_{src}| + |y_{dst} - y_{src}| == 1)$.
 - **Offered Rates**: Swept at 5%, 10%, 15%, 20%, 25%, 30%, 40%, 50% Bernoulli trial injection probability per node per cycle, evaluated on cycles where `in_local_ready == 1`.
-- **Target Injected Packets**: Exactly 350 flits injected per sweep point ($350 \times 24 = 8,400$ total flits across the benchmark suite).
+- **Target Injected Flits**: Exactly 350 flits injected per sweep point ($350 \times 24 = 8,400$ total flits across the benchmark suite).
 - **Simulation Duration & Drain**: Dynamic. Following injection of 350 flits, injection is ceased (`in_local_valid = '0`), and an autonomous drain phase of up to 2,000 cycles executes. Simulation completes when `total_delivered == total_injected`.
 - **Throughput Definition**: Aggregate delivered flits across the entire 16-node mesh divided by total simulation elapsed cycles ($\Theta = N_{\text{delivered}} / T_{\text{sim}}$, in `flits/cycle`).
-- **Latency Measurement Boundaries**: Cycle-accurate difference $L_i = T_{\text{eject}} - T_{\text{inject}}$. The cycle timestamp is stamped into the 16-bit payload field at the sender interface upon handshake (`valid && ready`) and extracted upon ejection handshake (`valid && ready`) at the destination local interface.
+- **Latency Measurement Boundaries**: Cycle-accurate difference $L_i = T_{\text{eject}} - T_{\text{inject}}$. In the simulation harness, the cycle timestamp is sampled and stamped into the 16-bit payload field at the negative clock edge during injection preparation (`in_local_valid = 1`) prior to the rising-edge source FIFO handshake, and extracted upon rising-edge ejection handshake (`out_local_valid && out_local_ready`) at the destination local interface.
 - **Packet Loss Calculation**: Computed as $100\% \times (1.0 - (N_{\text{delivered}} / N_{\text{injected}}))$. Incomplete drain or timeout triggers an explicit test error and simulation failure (`$finish(1)`).
 - **Deadlock Observation**: Zero deadlocks observed across all 24 workload points under the standard endpoint consumption assumption (`out_local_ready = 1`).
 
