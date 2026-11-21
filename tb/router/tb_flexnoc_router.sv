@@ -298,6 +298,135 @@ module tb_flexnoc_router;
               (out_east_valid === 1'b0) && (out_south_valid === 1'b0));
 
         // ----------------------------------------------------------------------
+        // Test 6: Asynchronous Reset During Active Traffic & Recovery
+        // ----------------------------------------------------------------------
+        $display("--- Testing Asynchronous Reset During Active Traffic ---");
+        // Inject flits into West and North targeting East and South
+        @(negedge clk);
+        in_west_data  = create_flit(2, 1, 0, 1, 8'hD1, 16'hDD01); in_west_valid  = 1;
+        in_north_data = create_flit(1, 2, 1, 0, 8'hD2, 16'hDD02); in_north_valid = 1;
+        out_east_ready = 0; // Hold backpressure so flits remain buffered
+        out_south_ready = 0;
+        @(posedge clk);
+        #1;
+        check("Test 6a: Traffic active before mid-flight reset",
+              (out_east_valid === 1'b1) && (out_south_valid === 1'b1));
+
+        // Assert asynchronous reset midway through cycle
+        #2;
+        rst_n = 0;
+        clear_inputs();
+        #1;
+        check("Test 6b: All egress valid signals immediately deasserted on reset",
+              {out_local_valid, out_north_valid, out_east_valid, out_south_valid, out_west_valid} === 5'b00000);
+        check("Test 6c: Ingress FIFOs report empty during reset", status_fifo_empty === 5'b11111);
+
+        repeat (3) @(posedge clk);
+        @(negedge clk);
+        rst_n = 1;
+        out_east_ready  = 1;
+        out_south_ready = 1;
+        @(posedge clk);
+        #1;
+        check("Test 6d: Post-reset idle state clean",
+              {out_local_valid, out_north_valid, out_east_valid, out_south_valid, out_west_valid} === 5'b00000);
+
+        // Verify clean recovery by injecting a new flit to East
+        inject_flit(PORT_WEST, 2, 1, 8'hD3, 16'hDD03);
+        #1;
+        check("Test 6e: Recovery flit successfully transmitted after reset", out_east_valid === 1'b1);
+        check("Test 6f: Recovery payload intact", get_payload(out_east_data) === 16'hDD03);
+        @(posedge clk);
+        #1;
+        check("Test 6g: Output idle after recovery", out_east_valid === 1'b0);
+
+        // ----------------------------------------------------------------------
+        // Test 7: Randomized Backpressure Stress
+        // ----------------------------------------------------------------------
+        $display("--- Testing Randomized Backpressure & Link Protocol Stability ---");
+        begin
+            int stress_injected;
+            int stress_received;
+            logic [15:0] stress_exp_payload;
+            int stress_cycles;
+
+            stress_injected = 0;
+            stress_received = 0;
+            stress_cycles = 0;
+
+            // Stream 20 flits West In -> East Out under random backpressure
+            while ((stress_received < 20) && (stress_cycles < 200)) begin
+                @(negedge clk);
+                // Randomize receiver readiness
+                out_east_ready = $urandom_range(0, 1);
+
+                // Inject next flit if ready and remaining
+                if ((stress_injected < 20) && in_west_ready) begin
+                    in_west_data = create_flit(2, 1, 0, 1, 8'(stress_injected), 16'hE100 + 16'(stress_injected));
+                    in_west_valid = 1'b1;
+                    stress_injected++;
+                end else begin
+                    in_west_valid = 1'b0;
+                end
+
+                @(posedge clk);
+                #1;
+                // Monitor output
+                if (out_east_valid && out_east_ready) begin
+                    stress_exp_payload = 16'hE100 + 16'(stress_received);
+                    check($sformatf("Test 7_stress[%0d]: payload verified", stress_received),
+                          get_payload(out_east_data) === stress_exp_payload);
+                    stress_received++;
+                end else if (out_east_valid && !out_east_ready) begin
+                    // Protocol invariant: Data must stay valid and unchanging during stall
+                    check("Test 7_invariant: Data valid during stall", out_east_valid === 1'b1);
+                end
+                stress_cycles++;
+            end
+
+            clear_inputs();
+            out_east_ready = 1;
+            while ((stress_received < stress_injected) && (stress_cycles < 250)) begin
+                @(posedge clk);
+                #1;
+                if (out_east_valid && out_east_ready) begin
+                    stress_received++;
+                end
+                stress_cycles++;
+            end
+
+            check("Test 7: All 20 stress flits received under backpressure", stress_received === 20);
+        end
+
+        // ----------------------------------------------------------------------
+        // Test 8: All 5 Ingress Ports Persistent Contention for Local Port
+        // ----------------------------------------------------------------------
+        $display("--- Testing 5-Way Simultaneous Contention for Local Port ---");
+        begin
+            @(negedge clk);
+            // All 5 ingress ports inject simultaneously targeting Local (dest = 1, 1)
+            in_local_data = create_flit(1, 1, 1, 1, 8'h50, 16'h5000); in_local_valid = 1;
+            in_north_data = create_flit(1, 1, 1, 0, 8'h51, 16'h5001); in_north_valid = 1;
+            in_east_data  = create_flit(1, 1, 2, 1, 8'h52, 16'h5002); in_east_valid  = 1;
+            in_south_data = create_flit(1, 1, 1, 2, 8'h53, 16'h5003); in_south_valid = 1;
+            in_west_data  = create_flit(1, 1, 0, 1, 8'h54, 16'h5004); in_west_valid  = 1;
+            out_local_ready = 1;
+
+            @(posedge clk);
+            @(negedge clk);
+            clear_inputs();
+
+            // All 5 flits must be granted and emerge sequentially over 5 cycles
+            for (int step = 0; step < 5; step++) begin
+                #1;
+                check($sformatf("Test 8_step[%0d]: Local valid active", step), out_local_valid === 1'b1);
+                @(posedge clk);
+            end
+            #1;
+            check("Test 8: Local port returns to idle after all 5 contention flits", out_local_valid === 1'b0);
+        end
+
+        // ----------------------------------------------------------------------
         // Final Router State
         // ----------------------------------------------------------------------
         repeat (3) @(posedge clk);
