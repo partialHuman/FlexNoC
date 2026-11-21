@@ -79,6 +79,21 @@ TEST_SUITES = [
         ],
         "top": "tb_mesh_4x4",
     },
+    {
+        "name": "Unit: scoreboard_fault_injection",
+        "category": "unit",
+        "sources": [
+            "rtl/common/flexnoc_pkg.sv",
+            "rtl/fifo/input_fifo.sv",
+            "rtl/routing/route_compute.sv",
+            "rtl/arbitration/round_robin_arbiter.sv",
+            "rtl/switch/crossbar_switch.sv",
+            "rtl/router/flexnoc_router.sv",
+            "rtl/network/mesh_top.sv",
+            "tb/unit/tb_scoreboard_fault_injection.sv"
+        ],
+        "top": "tb_scoreboard_fault_injection",
+    },
 ]
 
 def setup_env():
